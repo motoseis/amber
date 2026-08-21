@@ -60,6 +60,8 @@
 #include "ui/mainwindow.h"
 #include "ui/viewerwidget.h"
 
+#include "effects/internal/audiobpfiltereffect.h"
+#include "effects/internal/audiornnoiseeffect.h"
 #include "effects/internal/audionoiseeffect.h"
 #include "effects/internal/cornerpineffect.h"
 #include "effects/internal/fillleftrighteffect.h"
@@ -115,6 +117,10 @@ EffectPtr Effect::Create(Clip* c, const EffectMeta* em) {
         return std::make_shared<SolidEffect>(c, em);
       case EFFECT_INTERNAL_NOISE:
         return std::make_shared<AudioNoiseEffect>(c, em);
+      case EFFECT_INTERNAL_RNNOISE:
+        return std::make_shared<AudioRNNoiseEffect>(c, em);
+      case EFFECT_INTERNAL_BPFILTER:
+        return std::make_shared<AudioBpFilterEffect>(c, em);
       case EFFECT_INTERNAL_VOLUME:
         return std::make_shared<VolumeEffect>(c, em);
       case EFFECT_INTERNAL_PAN:
