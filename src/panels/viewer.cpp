@@ -368,6 +368,7 @@ void Viewer::next_frames() {
 }
 
 void Viewer::go_to_out() {
+	
   if (seq != nullptr) {
     if (seq->using_workarea) {
       seek(seq->workarea_out);

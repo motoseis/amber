@@ -68,8 +68,9 @@ static bool intermediatePassMirrors(QRhi* rhi) { return rhi->isYUpInNDC() && !rh
 
 // Helper: create a temporary pipeline, draw a fullscreen blit, then destroy the pipeline.
 // This replaces the old draw_clip() / full_blit() pattern.
-static void rhi_blit(ComposeSequenceParams& params, QRhiTextureRenderTarget* target, QRhiRenderPassDescriptor* rpd,
-                     QRhiTexture* srcTex, const QShader& vertShader, const QShader& fragShader, const QMatrix4x4& mvp,
+static void rhi_blit(ComposeSequenceParams& params, QRhiTextureRenderTarget* target, 
+					 QRhiRenderPassDescriptor* rpd,QRhiTexture* srcTex, const QShader& vertShader, 
+					 const QShader& fragShader, const QMatrix4x4& mvp,
                      const QByteArray& fragUboData, int fragUboSize, int texBindingCount = 1,
                      QRhiTexture* extraTex1 = nullptr, QRhiTexture* extraTex2 = nullptr,
                      bool skipClipSpaceCorr = false) {
