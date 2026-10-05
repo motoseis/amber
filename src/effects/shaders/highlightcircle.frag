@@ -1,12 +1,12 @@
 #version 440
 layout(std140, binding = 1) uniform FragParams {
-    vec2 resolution;
-    float centerX;
-    float centerY;
-    float radius;
-    float thickness;
-    float feather;
-    vec3 ringColor;
+  vec2 resolution;
+  float centerX;
+  float centerY;
+  float radius;
+  float thickness;
+  float feather;
+  vec3 ringColor;
 };
 layout(binding = 2) uniform sampler2D image;
 layout(location = 0) in vec2 vTexCoord;
@@ -32,5 +32,5 @@ void main(void) {
   float ringDist = abs(dist - r);
   float ringMask = 1.0 - smoothstep(halfThick - fe, halfThick, ringDist);
 
-  fragColor = vec4(mix(original.rgb, ringColor, ringMask), original.a);
+  fragColor = mix(original, vec4(ringColor, 1.0), ringMask);
 }

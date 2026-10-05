@@ -18,13 +18,14 @@ void main(void) {
   // gaussian - good enough to isolate "detail" for unsharp masking,
   // much cheaper per-pixel than the real thing
   vec4 blurred = original;
-  blurred += texture(image, vTexCoord + vec2( texel.x, 0.0));
+  blurred += texture(image, vTexCoord + vec2(texel.x, 0.0));
   blurred += texture(image, vTexCoord + vec2(-texel.x, 0.0));
-  blurred += texture(image, vTexCoord + vec2(0.0,  texel.y));
+  blurred += texture(image, vTexCoord + vec2(0.0, texel.y));
   blurred += texture(image, vTexCoord + vec2(0.0, -texel.y));
-  blurred *= 0.2; // average of 5 samples (center + 4 neighbors)
+  blurred *= 0.2;  // average of 5 samples (center + 4 neighbors)
 
   vec4 detail = original - blurred;
   fragColor = original + detail * (amount * 0.01);
-  fragColor.a = original.a; // don't sharpen the alpha channel
+  fragColor.rgb = clamp(fragColor.rgb, 0.0, 1.0);
+  fragColor.a = original.a;  // don't sharpen the alpha channel
 }
