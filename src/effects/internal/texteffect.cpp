@@ -427,7 +427,13 @@ void TextEffect::redraw(double timecode) {
                 position_y->GetDoubleAt(timecode) + padding);
   
   int global_char_index = 0;
-  
+
+  struct ClusterPath {
+    QPainterPath path;
+    double progress;
+  };
+  QVector<ClusterPath> cluster_paths;
+
   double current_frame = amber::ActiveSequence->playhead;
   double clip_start    = parent_clip->timeline_in();  
   double clip_end    = parent_clip->timeline_out();  
@@ -497,6 +503,11 @@ void TextEffect::redraw(double timecode) {
 
       double y_offset = (1.0 - progress) * rise;
 
+      // Winding fill so overlapping contours within a cluster (Devanagari
+      // conjuncts, stacked marks) union instead of cancelling.
+      QPainterPath cluster_path;
+      cluster_path.setFillRule(Qt::WindingFill);
+
       const QList<QGlyphRun> runs = text_line.glyphRuns(cluster_start, cluster_len);
       for (const QGlyphRun& run : runs) {
         QRawFont raw_font = run.rawFont();
@@ -508,29 +519,36 @@ void TextEffect::redraw(double timecode) {
 
           QTransform tf;
           tf.translate(anchor_x + positions.at(g).x(), anchor_y + positions.at(g).y() + y_offset);
-          QPainterPath placed = tf.map(glyph_path);
-
-          if (do_outline) {
-            QColor oc = outline_base_color;
-            oc.setAlphaF(oc.alphaF() * progress);
-            QPen pen(oc);
-            pen.setWidth(outline_width_val);
-            p.setPen(pen);
-            p.setBrush(Qt::NoBrush);
-            p.drawPath(placed);
-          }
-
-          QColor c = fill_color;
-          c.setAlphaF(c.alphaF() * progress);
-          p.setPen(Qt::NoPen);
-          p.setBrush(c);
-          p.drawPath(placed);
+          cluster_path.addPath(tf.map(glyph_path));
         }
       }
 
+      cluster_paths.append({cluster_path, progress});
       global_char_index++;
     }
-  }  
+  }
+
+  // All outlines before any fill, so a letter's outline never cuts into its
+  // neighbour's fill (Arabic joins).
+  if (do_outline) {
+    p.setBrush(Qt::NoBrush);
+    for (const ClusterPath& cp : cluster_paths) {
+      QColor oc = outline_base_color;
+      oc.setAlphaF(oc.alphaF() * cp.progress);
+      QPen pen(oc);
+      pen.setWidth(outline_width_val);
+      p.setPen(pen);
+      p.drawPath(cp.path);
+    }
+  }
+
+  p.setPen(Qt::NoPen);
+  for (const ClusterPath& cp : cluster_paths) {
+    QColor c = fill_color;
+    c.setAlphaF(c.alphaF() * cp.progress);
+    p.setBrush(c);
+    p.drawPath(cp.path);
+  }
   p.restore();
                                        
   p.end();
